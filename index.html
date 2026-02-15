@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Pro Toolkit</title>
+<title>🌟 Student Pro Toolkit</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 
 <style>
 body{
@@ -15,17 +17,7 @@ color:white;
 text-align:center;
 transition:0.4s;
 }
-
-.dark{ background:#111; }
-
-.site-title{
-font-size:28px;
-font-weight:bold;
-margin-bottom:10px;
-background:linear-gradient(45deg,#fff,#ffe4f0);
--webkit-background-clip:text;
-color:transparent;
-}
+.dark{background:#111;}
 
 .card{
 background:white;
@@ -35,12 +27,15 @@ margin:30px auto;
 padding:25px;
 border-radius:25px;
 box-shadow:0 15px 40px rgba(0,0,0,0.3);
-animation:fade 0.6s ease-in-out;
 }
 
-@keyframes fade{
-from{opacity:0;transform:translateY(20px);}
-to{opacity:1;transform:translateY(0);}
+.site-title{
+font-size:28px;
+font-weight:bold;
+margin-bottom:15px;
+background:linear-gradient(45deg,#fff,#ffe4f0);
+-webkit-background-clip:text;
+color:transparent;
 }
 
 button{
@@ -51,16 +46,16 @@ margin:6px;
 background:linear-gradient(45deg,#6d28d9,#ec4899);
 color:white;
 cursor:pointer;
-transition:0.3s;
 font-weight:bold;
 }
-button:hover{transform:scale(1.08);}
+button:hover{transform:scale(1.05);}
 
-input, textarea{
+input,textarea,select{
 padding:8px;
 margin:6px;
 border-radius:10px;
 border:1px solid #ccc;
+width:80%;
 }
 
 .app-grid{
@@ -72,54 +67,30 @@ margin-top:20px;
 
 .app-box{
 background:#f3f4f6;
-padding:25px;
+padding:20px;
 border-radius:20px;
 cursor:pointer;
-transition:0.3s;
 font-weight:bold;
 }
-.app-box:hover{
-background:#e9d5ff;
-transform:scale(1.05);
-}
+.app-box:hover{background:#e9d5ff;}
 
 .hidden{display:none;}
-
-.editor-page{
-border:1px solid #ccc;
-min-height:250px;
-padding:15px;
-margin:10px 0;
-text-align:left;
-border-radius:10px;
-}
-
-.toolbar button{
-background:#ddd;
-color:black;
-}
-
-.loader{
-display:none;
-margin-top:10px;
-font-weight:bold;
-color:#6d28d9;
-}
+.loader{display:none;color:#6d28d9;font-weight:bold;}
 </style>
 </head>
 
 <body>
 
-<div class="card" id="usernamePage">
-
+<!-- LOGIN PAGE -->
+<div class="card" id="loginPage">
 <div class="site-title">🌟 Student Pro Toolkit</div>
-
-<h3>Welcome</h3>
+<h3>Enter Your Name</h3>
 <input type="text" id="usernameInput" placeholder="Enter username">
 <br>
 <button onclick="enterApp()">Enter</button>
 </div>
 
+<!-- DASHBOARD -->
 <div class="card hidden" id="dashboard">
 <h2 id="welcomeText"></h2>
 <button onclick="toggleDark()">Dark Mode</button>
@@ -128,13 +99,17 @@ color:#6d28d9;
 <div class="app-box" onclick="openApp('textPDF')">📝 Text to PDF</div>
 <div class="app-box" onclick="openApp('imagePDF')">🖼 Image to PDF</div>
 <div class="app-box" onclick="openApp('resize')">📏 Resize / Compress</div>
-<div class="app-box" onclick="openApp('bgRemove')">🎨 Background Remove</div>
+<div class="app-box" onclick="openApp('translator')">🌍 Language Translator</div>
+<div class="app-box" onclick="openApp('dictionary')">📖 Dictionary</div>
+<div class="app-box" onclick="openApp('ocr')">📸 Image to Text</div>
+<div class="app-box" onclick="openApp('converter')">📂 File Converter</div>
 </div>
 </div>
 
-<div class="card hidden" id="appSection">
+<!-- TOOL SECTION -->
+<div class="card hidden" id="toolSection">
 <button onclick="goBack()">⬅ Back</button>
-<div id="appContent"></div>
+<div id="toolContent"></div>
 <div class="loader" id="loader">Processing...</div>
 </div>
 
@@ -143,231 +118,231 @@ color:#6d28d9;
 /* LOGIN */
 let username=localStorage.getItem("username");
 if(username){
-document.getElementById("usernamePage").classList.add("hidden");
-document.getElementById("dashboard").classList.remove("hidden");
-document.getElementById("welcomeText").innerText="Hello "+username;
+loginPage.classList.add("hidden");
+dashboard.classList.remove("hidden");
+welcomeText.innerText="Hello "+username;
 }
 
 function enterApp(){
-let name=document.getElementById("usernameInput").value;
-if(name==="") return alert("Enter username");
+let name=usernameInput.value;
+if(!name) return alert("Enter name");
 localStorage.setItem("username",name);
 location.reload();
 }
 
-function toggleDark(){
-document.body.classList.toggle("dark");
-}
+function toggleDark(){document.body.classList.toggle("dark");}
+function goBack(){toolSection.classList.add("hidden");dashboard.classList.remove("hidden");}
 
-function goBack(){
-document.getElementById("appSection").classList.add("hidden");
-document.getElementById("dashboard").classList.remove("hidden");
-}
-
+/* OPEN TOOL */
 function openApp(type){
-document.getElementById("dashboard").classList.add("hidden");
-document.getElementById("appSection").classList.remove("hidden");
-
+dashboard.classList.add("hidden");
+toolSection.classList.remove("hidden");
 let content="";
 
+/* TEXT PDF */
 if(type==="textPDF"){
 content=`
-<h3>Word Style Editor</h3>
-<div class="toolbar">
-<button onclick="format('bold')">Bold</button>
-<button onclick="format('italic')">Italic</button>
-<button onclick="format('underline')">Underline</button>
-<button onclick="addPage()">Add Page</button>
-</div>
-<div id="pages"></div>
-<button onclick="downloadTextPDF()">Download PDF</button>
-`;
-setTimeout(()=>addPage(),100);
+<h3>Text to PDF</h3>
+<textarea id="pdfText" rows="10" placeholder="Write text..."></textarea>
+<br><button onclick="downloadTextPDF()">Download PDF</button>`;
 }
 
+/* IMAGE PDF */
 if(type==="imagePDF"){
 content=`
-<h3>Multi Image to PDF</h3>
+<h3>Image to PDF</h3>
 <input type="file" id="multiImg" multiple accept="image/*">
-<br>
-<button onclick="downloadImagePDF()">Download PDF</button>
-`;
+<br><button onclick="downloadImagePDF()">Download PDF</button>`;
 }
 
+/* RESIZE */
 if(type==="resize"){
 content=`
 <h3>Resize / Compress</h3>
 <input type="file" id="resizeImg" accept="image/*">
 <br>
-<label>Scale:</label>
-<input type="range" min="0.1" max="2" step="0.1" value="1" id="scaleRange">
-<br>
-<label>Target KB:</label>
-<input type="number" id="targetKB" placeholder="Enter KB">
-<br>
-<button onclick="resizeImage()">Process</button>
+Target KB: <input type="number" id="targetKB">
+<br><button onclick="resizeImage()">Convert</button>
 <div id="resizeInfo"></div>
-<button onclick="downloadResized()">Download Image</button>
-`;
+<button onclick="downloadResized()">Download</button>`;
 }
 
-if(type==="bgRemove"){
+/* TRANSLATOR */
+if(type==="translator"){
 content=`
-<h3>Smart Background Remover</h3>
-<input type="file" id="bgImg" accept="image/*">
+<h3>Language Translator</h3>
+<textarea id="translateText" rows="6"></textarea><br>
+<select id="langSelect">
+<option value="gu">Gujarati</option>
+<option value="hi">Hindi</option>
+<option value="en">English</option>
+</select>
 <br>
-<button onclick="removeBG()">Remove Background</button>
-<button onclick="downloadBG()">Download PNG</button>
-<div id="bgPreview"></div>
-`;
+<button onclick="translateText()">Translate</button>
+<div id="translateResult"></div>`;
 }
 
-document.getElementById("appContent").innerHTML=content;
+/* DICTIONARY */
+if(type==="dictionary"){
+content=`
+<h3>Dictionary</h3>
+<input type="text" id="dictWord" placeholder="Enter word">
+<br><button onclick="findMeaning()">Search</button>
+<div id="dictResult"></div>`;
+}
+
+/* OCR */
+if(type==="ocr"){
+content=`
+<h3>Image to Text (OCR)</h3>
+<input type="file" id="ocrImg" accept="image/*">
+<br><button onclick="runOCR()">Extract Text</button>
+<textarea id="ocrResult" rows="8"></textarea>`;
+}
+
+/* CONVERTER */
+if(type==="converter"){
+content=`
+<h3>File Converter</h3>
+<input type="file" id="convertFile">
+<br>
+<select id="convertType">
+<option value="png">Convert to PNG</option>
+<option value="jpg">Convert to JPG</option>
+</select>
+<br>
+<button onclick="convertFile()">Convert</button>`;
+}
+
+toolContent.innerHTML=content;
 }
 
 /* TEXT PDF */
-function format(cmd){ document.execCommand(cmd); }
-
-function addPage(){
-let div=document.createElement("div");
-div.className="editor-page";
-div.contentEditable="true";
-div.innerHTML="Start writing here...";
-document.getElementById("pages").appendChild(div);
-}
-
 function downloadTextPDF(){
 const { jsPDF }=window.jspdf;
-const pdf=new jsPDF();
-let y=10;
-document.querySelectorAll(".editor-page").forEach((page,i)=>{
-let text=page.innerText;
+let pdf=new jsPDF();
+let text=document.getElementById("pdfText").value;
 let lines=pdf.splitTextToSize(text,180);
-pdf.text(lines,10,y);
-if(i<document.querySelectorAll(".editor-page").length-1)
-pdf.addPage();
-});
-pdf.save("TextPDF.pdf");
+pdf.text(lines,10,10);
+pdf.save("Text.pdf");
 }
 
 /* IMAGE PDF */
 function downloadImagePDF(){
 const files=document.getElementById("multiImg").files;
-if(files.length===0) return alert("Upload images");
+if(!files.length) return alert("Upload images");
 const { jsPDF }=window.jspdf;
-const pdf=new jsPDF();
+let pdf=new jsPDF();
 let count=0;
 for(let i=0;i<files.length;i++){
-const reader=new FileReader();
+let reader=new FileReader();
 reader.onload=function(e){
 if(count>0) pdf.addPage();
 pdf.addImage(e.target.result,"JPEG",10,10,190,270);
 count++;
-if(count===files.length) pdf.save("ImagesPDF.pdf");
+if(count===files.length) pdf.save("Images.pdf");
 }
 reader.readAsDataURL(files[i]);
 }
 }
 
-/* RESIZE */
+/* RESIZE PERFECT KB */
 let resizedData=null;
-
 function resizeImage(){
-const file=document.getElementById("resizeImg").files[0];
+let file=resizeImg.files[0];
 if(!file) return alert("Upload image");
+loader.style.display="block";
 
-document.getElementById("loader").style.display="block";
-
-const scale=parseFloat(document.getElementById("scaleRange").value);
-const targetKB=parseInt(document.getElementById("targetKB").value);
-
-const img=new Image();
-const reader=new FileReader();
-
+let img=new Image();
+let reader=new FileReader();
 reader.onload=function(e){
 img.src=e.target.result;
 img.onload=function(){
-const canvas=document.createElement("canvas");
-canvas.width=img.width*scale;
-canvas.height=img.height*scale;
-const ctx=canvas.getContext("2d");
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
+let canvas=document.createElement("canvas");
+canvas.width=img.width;
+canvas.height=img.height;
+let ctx=canvas.getContext("2d");
+ctx.drawImage(img,0,0);
 
 let quality=0.9;
 let dataURL=canvas.toDataURL("image/jpeg",quality);
+let target=parseInt(targetKB.value);
 
-if(targetKB){
-let currentKB=Math.round((dataURL.split(',')[1].length*3/4)/1024);
-while(currentKB>targetKB && quality>0.1){
+while(target && ((dataURL.length*3/4)/1024)>target && quality>0.1){
 quality-=0.05;
 dataURL=canvas.toDataURL("image/jpeg",quality);
-currentKB=Math.round((dataURL.split(',')[1].length*3/4)/1024);
-}
 }
 
 resizedData=dataURL;
-let finalKB=Math.round((resizedData.split(',')[1].length*3/4)/1024);
-document.getElementById("resizeInfo").innerText="Final Size: "+finalKB+" KB";
-document.getElementById("loader").style.display="none";
+let finalKB=Math.round((dataURL.length*3/4)/1024);
+resizeInfo.innerText="Final Size: "+finalKB+" KB";
+loader.style.display="none";
 }
 }
 reader.readAsDataURL(file);
 }
 
 function downloadResized(){
-if(!resizedData) return alert("Process first");
+if(!resizedData) return alert("Convert first");
 let a=document.createElement("a");
 a.href=resizedData;
-a.download="Resized.jpg";
+a.download="Compressed.jpg";
 a.click();
 }
 
-/* STRONG BG REMOVE */
-let bgData=null;
+/* TRANSLATE (Google API Free Trick) */
+function translateText(){
+let text=translateText.value;
+let lang=langSelect.value;
+fetch(https://api.mymemory.translated.net/get?q=${text}&langpair=en|${lang})
+.then(res=>res.json())
+.then(data=>translateResult.innerText=data.responseData.translatedText);
+}
 
-function removeBG(){
-const file=document.getElementById("bgImg").files[0];
+/* DICTIONARY */
+function findMeaning(){
+let word=dictWord.value;
+fetch(https://api.dictionaryapi.dev/api/v2/entries/en/${word})
+.then(res=>res.json())
+.then(data=>{
+dictResult.innerText=data[0].meanings[0].definitions[0].definition;
+});
+}
+
+/* OCR */
+function runOCR(){
+let file=ocrImg.files[0];
 if(!file) return alert("Upload image");
+loader.style.display="block";
+Tesseract.recognize(file,'eng').then(({data:{text}})=>{
+ocrResult.value=text;
+loader.style.display="none";
+});
+}
 
-document.getElementById("loader").style.display="block";
-
-const img=new Image();
-const reader=new FileReader();
-
+/* FILE CONVERTER */
+function convertFile(){
+let file=convertFile.files[0];
+if(!file) return alert("Upload file");
+let reader=new FileReader();
 reader.onload=function(e){
+let img=new Image();
 img.src=e.target.result;
 img.onload=function(){
-const canvas=document.createElement("canvas");
+let canvas=document.createElement("canvas");
 canvas.width=img.width;
 canvas.height=img.height;
-const ctx=canvas.getContext("2d");
+let ctx=canvas.getContext("2d");
 ctx.drawImage(img,0,0);
-
-const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-const data=imageData.data;
-
-for(let i=0;i<data.length;i+=4){
-let brightness=(data[i]+data[i+1]+data[i+2])/3;
-if(brightness>190){
-data[i+3]=0;
-}
-}
-
-ctx.putImageData(imageData,0,0);
-bgData=canvas.toDataURL("image/png");
-document.getElementById("bgPreview").innerHTML="<img src='"+bgData+"' width='100%'>";
-document.getElementById("loader").style.display="none";
+let type=convertType.value;
+let dataURL=canvas.toDataURL("image/"+type);
+let a=document.createElement("a");
+a.href=dataURL;
+a.download="Converted."+type;
+a.click();
 }
 }
 reader.readAsDataURL(file);
-}
-
-function downloadBG(){
-if(!bgData) return alert("Remove background first");
-let a=document.createElement("a");
-a.href=bgData;
-a.download="NoBG.png";
-a.click();
 }
 
 </script>
