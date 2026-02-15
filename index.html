@@ -16,8 +16,15 @@ text-align:center;
 transition:0.4s;
 }
 
-.dark{
-background:#111;
+.dark{ background:#111; }
+
+.site-title{
+font-size:28px;
+font-weight:bold;
+margin-bottom:10px;
+background:linear-gradient(45deg,#fff,#ffe4f0);
+-webkit-background-clip:text;
+color:transparent;
 }
 
 .card{
@@ -104,7 +111,10 @@ color:#6d28d9;
 <body>
 
 <div class="card" id="usernamePage">
-<h2>Welcome</h2>
+
+<div class="site-title">🌟 Student Pro Toolkit</div>
+
+<h3>Welcome</h3>
 <input type="text" id="usernameInput" placeholder="Enter username">
 <br>
 <button onclick="enterApp()">Enter</button>
@@ -130,6 +140,7 @@ color:#6d28d9;
 
 <script>
 
+/* LOGIN */
 let username=localStorage.getItem("username");
 if(username){
 document.getElementById("usernamePage").classList.add("hidden");
@@ -202,10 +213,10 @@ content=`
 
 if(type==="bgRemove"){
 content=`
-<h3>Background Remove (Light BG Only)</h3>
+<h3>Smart Background Remover</h3>
 <input type="file" id="bgImg" accept="image/*">
 <br>
-<button onclick="removeBG()">Remove</button>
+<button onclick="removeBG()">Remove Background</button>
 <button onclick="downloadBG()">Download PNG</button>
 <div id="bgPreview"></div>
 `;
@@ -229,7 +240,6 @@ function downloadTextPDF(){
 const { jsPDF }=window.jspdf;
 const pdf=new jsPDF();
 let y=10;
-
 document.querySelectorAll(".editor-page").forEach((page,i)=>{
 let text=page.innerText;
 let lines=pdf.splitTextToSize(text,180);
@@ -244,10 +254,8 @@ pdf.save("TextPDF.pdf");
 function downloadImagePDF(){
 const files=document.getElementById("multiImg").files;
 if(files.length===0) return alert("Upload images");
-
 const { jsPDF }=window.jspdf;
 const pdf=new jsPDF();
-
 let count=0;
 for(let i=0;i<files.length;i++){
 const reader=new FileReader();
@@ -261,7 +269,7 @@ reader.readAsDataURL(files[i]);
 }
 }
 
-/* RESIZE FIXED */
+/* RESIZE */
 let resizedData=null;
 
 function resizeImage(){
@@ -278,7 +286,6 @@ const reader=new FileReader();
 
 reader.onload=function(e){
 img.src=e.target.result;
-
 img.onload=function(){
 const canvas=document.createElement("canvas");
 canvas.width=img.width*scale;
@@ -300,7 +307,6 @@ currentKB=Math.round((dataURL.split(',')[1].length*3/4)/1024);
 
 resizedData=dataURL;
 let finalKB=Math.round((resizedData.split(',')[1].length*3/4)/1024);
-
 document.getElementById("resizeInfo").innerText="Final Size: "+finalKB+" KB";
 document.getElementById("loader").style.display="none";
 }
@@ -316,7 +322,7 @@ a.download="Resized.jpg";
 a.click();
 }
 
-/* BG REMOVE IMPROVED */
+/* STRONG BG REMOVE */
 let bgData=null;
 
 function removeBG(){
@@ -330,7 +336,6 @@ const reader=new FileReader();
 
 reader.onload=function(e){
 img.src=e.target.result;
-
 img.onload=function(){
 const canvas=document.createElement("canvas");
 canvas.width=img.width;
@@ -342,17 +347,13 @@ const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
 const data=imageData.data;
 
 for(let i=0;i<data.length;i+=4){
-let r=data[i];
-let g=data[i+1];
-let b=data[i+2];
-
-if(r>200 && g>200 && b>200){
+let brightness=(data[i]+data[i+1]+data[i+2])/3;
+if(brightness>190){
 data[i+3]=0;
 }
 }
 
 ctx.putImageData(imageData,0,0);
-
 bgData=canvas.toDataURL("image/png");
 document.getElementById("bgPreview").innerHTML="<img src='"+bgData+"' width='100%'>";
 document.getElementById("loader").style.display="none";
